@@ -1,4 +1,4 @@
-package edu.handong.csee;
+package edu.handong.csee.utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,14 +15,33 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache commons.cli.ParseException;
+import org.apache.commons.cli.ParseException;
 
 public class combiner {
 	String resultPath="";
 	boolean help;
 	
-	public void run(String args[]) {
-		Options options =createOptions();
+	public void run(String args[]) throws IOException {
+		Options options =new Options();
+		int numOfThreads =10;
+		createOptions(options);
+		
+		Thread[] thread = new Thread[numOfThreads];
+		
+		try {
+			if(args.length<5) {
+				 throw new customizedException();
+			} 
+		}catch(customizedException e) {
+				System.out.println(e.getMessage());
+				System.exit(0);
+		}
+			if(parseOptions(options,args)) {
+				if(help) {
+					printHelp(options);
+					return;
+				}
+		}
 		
 	}
 	
@@ -42,8 +61,8 @@ public class combiner {
 		return true;
 	}
 	
-	private Options createOptions() {
-		Options options = new Options();
+	private void createOptions(Options options) {
+		
 		
 		options.addOption(Option.builder("i").longOpt("input")
 						.desc("Set an input file path. zip file")
@@ -62,13 +81,13 @@ public class combiner {
 				.desc("Help")
 				.build());
 		
-		return options;
+		
 	}
 	
 	private void printHelp(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
 		String header = "통일한국개론 수집 데이터 합치기 ";
 		String footer ="";
-		formatter.printHelp("HGUCourseCounter", header, options, footer, true);
+		formatter.printHelp("JavaFinalProject", header, options, footer, true);
 	}
 }

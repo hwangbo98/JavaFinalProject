@@ -1,6 +1,7 @@
 package edu.handong.csee.utils;
 
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,61 +13,47 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 
 public class excelReader {
-	public ArrayList<String> getData(String path) {
-		ArrayList<String> values = new ArrayList<String>();
-		
-		System.out.println(path);
-		
-		try (InputStream inp = new FileInputStream(path)) {
-		    //InputStream inp = new FileInputStream("workbook.xlsx");
-		    
-		        Workbook wb = WorkbookFactory.create(inp);
-		        Sheet sheet = wb.getSheetAt(0);
-		        Row row = sheet.getRow(2);
-		        Cell cell = row.getCell(1);
-		        if (cell == null)
-		            cell = row.createCell(3);
-		        
-		        values.add(cell.getStringCellValue());
-		        
-		    } catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		
-		return values;
-	}
 	
-	public ArrayList<String> getData(InputStream is) {
+	public ArrayList<String> getData(InputStream is, boolean removeHeader, int fileNum){
 		ArrayList<String> values = new ArrayList<String>();
 		
-		try (InputStream inp = is) {
-		    //InputStream inp = new FileInputStream("workbook.xlsx");
-		    
-		        Workbook wb = WorkbookFactory.create(inp);
-		        Sheet sheet = wb.getSheetAt(0);
-		        Row row = sheet.getRow(2);
-		        Cell cell = row.getCell(1);
-		        if (cell == null)
-		            cell = row.createCell(3);
-		        
-		        values.add(cell.getStringCellValue());
-		        
-		    } catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	
+	try(InputStream input = is) {
+		Workbook workbook = WorkbookFactory.create(input);
+		Sheet sheet = workbook.getSheetAt(0);
 		
-		return values;
+		for(int indexOfRow = sheet.getFirstRowNum() +1; indexOfRow<sheet.getPhysicalNumberOfRows(); indexOfRow++) {
+			String line ="";
+			Row row = sheet.getRow(indexOfRow);
+			
+			for(int indexOfCell = row.getFirstCellNum(); indexOfCell<row.getPhysicalNumberOfCells(); indexOfCell++) {
+				Cell cell = row.getCell(indexOfCell);
+				
+				try {
+					line = line + "\"" + cell.getStringCellValue().replaceAll("\"", "") + "\"";
+				} catch(IllegalStateException e) {
+					line = line + "\"" + cell.getNumericCellValue() + "\"";
+				}
+				
+				if(indexOfCell != row.getPhysicalNumberOfCells() -1) {
+					line = line + ",";
+				}
+				
+			}
+			values.add(line);
+		}
+	} catch (FileNotFoundException e) {
+		e.printStackTrace();
+	} catch(IOException e) {
+		e.printStackTrace();
 	}
+	return values;
 }
-
 }
+	
+	
